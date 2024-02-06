@@ -1,0 +1,109 @@
+* Operating system: Linux (on our project server, cs165.cs.ucr.edu).
+* Software required: gdb (GNU Debugger, already on the server) 
+	and p2.tgz (Makefile and try_me.c)
+* Other inputs: Team-specific values for STRING1 and STRING2 (see below)
+* Other reference: Intel 64 and IA-32 Architectures Software Developer's Manual. Volume 2 (2A, 2B & 2C): Instruction Set Reference, A-Z
+
+In this project, you will be given a vulnerable program (try_me.c) and 
+exploit the buffer overflow vulnerability in it.  When the program is run
+normally, it simply prints the input provided.  However, by using the
+debugger, you can change the program execution by modifying the return
+address and other stack data to exploit the vulnerability.  Your goal
+is to change the value of the variable "test" after the strcpy in the 
+function "test" using GDB, but prior to the function "test" returning 
+to hijack the program's control flow in three ways.  
+
+Specifically, you will create a GDB Script, which is a sequence of GDB
+commands that can be run from the command line as "gdb -x <gdb_script> 
+cs165-p2" to run the program to the desired point in the function "test,"
+change the value of the variable "test" (after the strcpy, as if the 
+value "input" overflowed the buffer allocated for "test"), and then run the
+rest of the program to complete exploitation, producing the desired result 
+for each of the three scenarios.
+
+To set the value of the variable test to perform the exploit, use the GDB 
+command "set test[i] = 0xYY" for each byte you need to change, where "i" 
+is an offset from the start of the "test" buffer and "0xYY" is the value to
+set at that offset.  Using these commands you will modify the stack to 
+complete your exploit.  Note that you only need to change the bytes necessary 
+to modify the stack to complete the exploit.
+
+To carry out the project, you need to understand a few things which will be covered in class and lab sessions:
+- Basic assembly language knowledge
+- Stack layout
+- Function calling convention
+- Stack buffer overflow vulnerability
+- Exploit methods
+
+Notes: 
+1. Stack may be modified using gdb only while the function "test" is running.
+2. Canary is disabled.
+3. ASLR is disabled.
+
+
+Program Customization: Each program will be customized by setting team-specific values for two #defines STRING1 and STRING2.  TA Zheng will provide each team with their values.  It is the team's responsibility to make sure that they have obtained their values.  Please set these values in the #define statements in lines 12 and 13 of try_me.c.
+
+
+Part 1: buffer overflow the program to create the file "uid_[uid]_crack" in the directory where the program is run.
+
+The uid_[uid]_crack file is a proof that you have successfully exploited the vulnerability. The [uid] will be your actual user id. For instance, if team0 is your user name and the corresponding uid is 1001, then the file you generate should be uid_1001_crack.
+
+NOTE: We will run your program in a controlled environment to
+determine whether the file is created.
+
+NOTE: Ignore the compiler warnings regarding buf and buf2 being unused.  They are just used to create stack space.
+ 
+Workflow:
+- Locate the opportunity for buffer overflow.
+- Overwrite the stack to change the stored return address.
+- Jump to the correct location in log_result() to cause the file creation.
+
+NOTE: Create a script of gdb commands, which you can run using 'gdb -x
+<script> cs165-p2'.  All the modifications to memory must be performed
+within the execution of the function "test".
+
+Submission requirement: 
+- (1 point) Create a file in the directory in which the program is run. 
+- (2 points) The input gdb script (<gdb_script>) run using gdb -x, following the directions above.
+- (1 point) Documentation detailing the methodology and thought process. Figures can be used to illustrate the attack steps.  Please limit this to 1 page.
+- (1 bonus points) Do not let the program crash.
+
+
+
+Part 2: buffer overflow the program to create the file "uid_[uid]_crack_advanced" in the directory where the program is run.
+
+The uid_[uid]_crack_advanced file is used as a proof that you have successfully completed the challenge. The workflow is the same except that now you will need to invoke log_result_advanced(int) with an argument that enables the code that enables the file create operation is successfully invoked. NOTE: You must hijack the program to run from the start of that function.
+
+Hint: the argument to log_result_advanced(int) should be prepared on stack also.
+Hint: See the assembly of log_result_advanced using "objdump" to determine how argument is retrieved from the stack by this function.
+
+Submission requirement: 
+- (1 point) Create the correct file in the directory where the program is run. 
+- (1 point) The input gdb script (<gdb_script>) run using gdb -x, following the directions above.
+- (1 point) Documentation detailing the methodology and thought process. Please limit this to 1 page.
+
+
+
+Part 3: buffer overflow the program to set the value of a function pointer in "function_pointer_function" to perform a shell command. 
+
+Use the buffer overflow in "test" to define a function pointer value to be used in the "function_pointer_function" to invoke the "/bin/ls" command in the function "shell_function."  Note that your payload must call the "function_pointer_function" (printing the "printf" statement there) prior to invoking "/bin/ls -la."
+
+NOTE: Note that there are multiple ways to invoke 'system("/bin/ls -la")', but
+you need to make sure that the command is run (more than invoking "system").
+
+Submission requirement: 
+- (1 point) Cause the "ls -la" output to be produced.  
+- (1 point) The input gdb script (<gdb_script>) run using gdb -x, following the directions above.
+- (1 point) Documentation detailing the methodology and thought process. Please limit this to 1 page.
+
+
+General hints: You can compile the program locally and dissect it using
+any disassembler (I used 'objdump'). You can use "gdb" on the target
+machine to understand its behavior.  However, when debugging the
+program, even if you can "exploit" it, you are not actually achieving
+the goal (because the uid and gid of the process will become your own,
+instead of the setuid and setgid, i.e., admin).
+  
+Note that the stack addresses will be different between the debugging run and a regular run, but we will only test under the debugger in this project. See
+http://www.mathyvanhoef.com/2012/11/common-pitfalls-when-writing-exploits.html
+for details.
