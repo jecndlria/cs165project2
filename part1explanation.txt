@@ -1,0 +1,15 @@
+For Part 1, the goal is to create the uid_crack file.
+In order to achieve this, we must rewrite the return address in the test stack frame to point to the log_result function, simulating a buffer overflow.
+
+Looking at the stack allocation, we know that the return address will be 4 bytes away from the $ebp ($eip backup is at address $ebp+4).
+We also know that since there is no ASLR, all the addresses will be the same on every run.
+We simply have to find the offset between the space allocated for the test variable and the $eip backup, then write the return address to the offset.
+We can use GDB to print the addresses we need:
+    log_result function: 0x08048668.
+    test variable: 0xffffc4c3
+    $ebp: 0xffffc4e8
+        $eip backup can be deduced to be $ebp + 4, so address to overwrite is at: 0xffffc4ec
+Offset between test and $eip backup: 0xffffc4ec - 0xffffc4c3 = 41
+    We then write 4 bytes for each byte of the return address starting from test[41] to test[44].
+
+For the extra credit, we inspected the objdump and found that the address we should return to to prevent the address from crashing is &main + 116, corresponding to the exit(0) instruction.
