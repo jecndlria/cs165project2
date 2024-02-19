@@ -1,11 +1,7 @@
 break test
 r AAAAAAAAAAAAAAAB
-step
-step
-step
-step
+step 4
 set {int}($ebp+4)=&log_result
-step
-step
-step
-step
+step 4
+set {int}($ebp+4)=&main+116
+step 3
