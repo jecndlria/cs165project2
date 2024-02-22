@@ -16,5 +16,5 @@ Offset between test and $eip backup: 0xffffc4ec - 0xffffc4c3 = 41 (in decimal)
 The crash happens because when we overwrite the return address, we have no way of getting back to where we originally came from (main).
 The return address is always pushed onto the stack right before a function call.
 So, we need to somehow push the return address we originally overwrote onto the stack underneath the return address we overwrote before we "return" to log_result.
-To do this, we can overwrite the parameter variable "input" with the return address we overwrote (0x08048760).
+To do this, we can overwrite the parameter variable "input" with the return address we overwrote (0x08048760), since the value of the parameter lies right below the return address we overwrote.
 Since parameters are stored below the return addresses, we can just treat that parameter as the return address to our false function call.

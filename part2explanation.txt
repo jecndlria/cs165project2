@@ -1,0 +1,4 @@
+&log_result_advanced = 0x8048697
+Like in part 1, we set the return address to this address.
+Parameter = 0xefbeadde
+However, we must set this parameter in order to create the crack file.
